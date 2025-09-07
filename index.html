@@ -3,44 +3,507 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ocean Heat Content — My Climate Site</title>
+  <title>The Ocean is Getting HOT — Climate Crisis Visualization</title>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root { --ink:#0b1220; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 20px; color: var(--ink); }
-    .wrap { max-width: 920px; margin: 0 auto; }
-    #chartWrap { position: relative; height: 420px; }
-    .big { font-size: 1.25rem; margin: 8px 0 12px; }
-    footer { margin-top: 18px; font-size: 0.9rem; color: #475569; }
-    code { background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }
-    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    input[type="number"] { padding: 6px 8px; width: 110px; }
-    .ok { background:#0ea5e9; color:white; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; }
-    .ok:hover { filter: brightness(1.05); }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+    
+    :root { 
+      --deep-ocean: #0a1628;
+      --burning-red: #dc2626;
+      --warning-orange: #ea580c;
+      --ocean-blue: #0ea5e9;
+      --ice-white: #f8fafc;
+      --danger-glow: rgba(220, 38, 38, 0.3);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body { 
+      font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+      background: linear-gradient(135deg, var(--deep-ocean) 0%, #1e293b 100%);
+      color: var(--ice-white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+      background: radial-gradient(ellipse at center, rgba(220, 38, 38, 0.1) 0%, transparent 70%);
+      position: relative;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="g"><stop offset="0%" stop-color="%23dc2626" stop-opacity="0.1"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><circle cx="50" cy="50" r="50" fill="url(%23g)"/></svg>') center/cover;
+      animation: pulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.05); }
+    }
+    
+    .hero h1 {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--ice-white);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      line-height: 1.1;
+    }
+    
+    .hero .subtitle {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 300;
+      margin-bottom: 30px;
+      opacity: 0.9;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .prototype-banner {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: #ffffff;
+      padding: 16px 24px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.25rem;
+      border-bottom: 4px solid #7f1d1d;
+      box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      animation: bannerPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes bannerPulse {
+      0%, 100% {
+        box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+      }
+      50% {
+        box-shadow: 0 8px 16px rgba(220, 38, 38, 0.4);
+      }
+    }
+
+    .prototype-banner strong {
+      color: #fef3c7;
+      text-shadow: 0 0 4px rgba(254, 243, 199, 0.5);
+    }
+
+    .prototype-banner .close-icon {
+      float: right;
+      font-size: 1.5rem;
+      cursor: pointer;
+      margin-left: 20px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .prototype-banner .close-icon:hover {
+      opacity: 1;
+    }
+    
+    .wrap { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 0 20px;
+    }
+    
+    .impact-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin: 50px 0;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.1), transparent);
+      transition: left 0.5s;
+    }
+    
+    .stat-card:hover::before {
+      left: 100%;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(220, 38, 38, 0.2);
+      border-color: var(--burning-red);
+    }
+    
+    .stat-number {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--burning-red);
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px var(--danger-glow);
+    }
+    
+    .stat-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .stat-description {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      line-height: 1.4;
+    }
+    
+    .personal-impact {
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(234, 88, 12, 0.1));
+      border-radius: 20px;
+      padding: 40px;
+      margin: 50px 0;
+      border: 2px solid rgba(220, 38, 38, 0.3);
+      position: relative;
+    }
+    
+    .personal-impact::before {
+      content: '⚠️';
+      position: absolute;
+      top: 25px;
+      right: 30px;
+      font-size: 1.5rem;
+      opacity: 0.7;
+    }
+    
+    .personal-impact h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--burning-red);
+    }
+    
+    .birth-input-section {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    
+    .birth-input-section label {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    input[type="number"] { 
+      padding: 12px 16px; 
+      width: 140px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--ice-white);
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--burning-red);
+      box-shadow: 0 0 20px var(--danger-glow);
+    }
+    
+    .reload-btn { 
+      background: linear-gradient(45deg, var(--burning-red), var(--warning-orange));
+      color: white; 
+      border: none; 
+      padding: 12px 24px; 
+      border-radius: 12px; 
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+    
+    .reload-btn:hover { 
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+    }
+    
+    #sinceBirth {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--burning-red);
+      text-shadow: 0 0 15px var(--danger-glow);
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(220, 38, 38, 0.1);
+      border-radius: 15px;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+    
+    .chart-section {
+      margin: 60px 0;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 20px;
+      padding: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .chart-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-align: center;
+      color: var(--ice-white);
+    }
+    
+    #chartWrap { 
+      position: relative; 
+      height: 500px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+      padding: 20px;
+    }
+    
+    .reality-check {
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(0, 0, 0, 0.3));
+      border-radius: 20px;
+      padding: 40px;
+      margin: 50px 0;
+      border: 2px solid var(--burning-red);
+      text-align: center;
+    }
+    
+    .reality-check h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--burning-red);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .reality-check p {
+      font-size: 1.3rem;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+    
+    .consequences {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin: 50px 0;
+    }
+    
+    .consequence-card {
+      background: rgba(220, 38, 38, 0.1);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      border-radius: 15px;
+      padding: 30px;
+      transition: all 0.3s ease;
+    }
+    
+    .consequence-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(220, 38, 38, 0.2);
+    }
+    
+    .consequence-card h3 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: var(--burning-red);
+    }
+    
+    .consequence-card p {
+      line-height: 1.5;
+      opacity: 0.9;
+    }
+    
+    footer { 
+      margin-top: 80px; 
+      padding: 40px 0;
+      font-size: 0.9rem; 
+      opacity: 0.7;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    code { 
+      background: rgba(255, 255, 255, 0.1); 
+      padding: 4px 8px; 
+      border-radius: 6px;
+      font-family: 'Monaco', 'Menlo', monospace;
+    }
+    
+    @media (max-width: 768px) {
+      .hero {
+        padding: 40px 20px 30px;
+      }
+      
+      .impact-stats {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .birth-input-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+      
+      .consequences {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="hero">
+    <h1>The Ocean is Getting HOT</h1>
+    <p class="subtitle">Our planet's vast oceans are absorbing catastrophic amounts of heat. This is not just data—this is our future disappearing before our eyes.</p>
+  </div>
+
+  <!-- PROTOTYPE BANNER - Remove this entire div for production -->
+  <div class="prototype-banner">
+    <span><strong>PROTOTYPE</strong></span>
+  </div>
+
   <div class="wrap">
-    <h1>Ocean Heat Content (0–2000 m)</h1>
-    <p>This chart shows how much heat the global ocean has gained over time. Most of the extra heat from climate change is stored in the oceans.</p>
+    <div class="impact-stats">
+      <div class="stat-card">
+        <div class="stat-number">91%</div>
+        <div class="stat-label">Ocean Heat Storage</div>
+        <div class="stat-description">Of the excess heat energy trapped in Earth's climate system by greenhouse gases, the ocean stores 91%.</div>
+      </div>
 
-    <div class="row">
-      <label>My birth year:
-        <input id="birthYear" type="number" value="2015" min="1900" max="2100" />
-      </label>
-      <button class="ok" id="reloadBtn" title="Reload data file">Reload data</button>
+      <div class="stat-card">
+        <div class="stat-number">>90%</div>
+        <div class="stat-label">Ocean Warming Rate</div>
+        <div class="stat-description">More than 90 percent of warming on Earth over the past 50 years has occurred in the ocean.</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-number">63%</div>
+        <div class="stat-label">Heat Increase</div>
+        <div class="stat-description">Warming of the upper oceans accounts for 63% of the total increase in stored heat from 1971-2010.</div>
+      </div>
     </div>
-    <div id="sinceBirth" class="big"></div>
 
-    <div id="chartWrap">
-      <canvas id="chart"></canvas>
+    <div class="personal-impact">
+      <h2>In Your Lifetime</h2>
+      <div class="birth-input-section">
+        <label>Enter your birth year:
+          <input id="birthYear" type="number" value="1990" min="1900" max="2024" />
+        </label>
+        <button class="reload-btn" id="reloadBtn" title="Reload data">Update Data</button>
+      </div>
+      <div id="sinceBirth">Loading your personal impact...</div>
+    </div>
+
+    <div class="chart-section">
+      <h2 class="chart-title">Ocean Heat Content: The Relentless Rise (0–2000m depth)</h2>
+      <div id="chartWrap">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <div class="reality-check">
+      <h2>This Is Not Normal</h2>
+      <p>The ocean has absorbed more heat in the last 50 years than in the previous 10,000 years combined.</p>
+      <p>Every second, our oceans absorb heat equivalent to 5 Hiroshima bombs.</p>
+      <p><strong>This heat doesn't just disappear. It's changing everything.</strong></p>
+    </div>
+
+    <div class="reality-check">
+      <h2>Understanding Ocean Heat Content</h2>
+      <p>Ocean heat content measurements track how much heat the ocean has absorbed over time. These measurements are crucial for understanding climate change because:</p>
+      <ul style="text-align: left; display: inline-block; margin-top: 20px;">
+        <li>Oceans cover 70% of Earth's surface and absorb more than <strong>93% of the planet's excess heat</strong></li>
+        <li>Heat content is measured from the surface down to 2,000 meters depth</li>
+        <li>Global monitoring networks provide data since the 1950s, showing unprecedented warming</li>
+        <li>OHC data helps predict future climate impacts and validate climate models</li>
+        <li>The ocean's thermal expansion from this heat is the primary driver of sea level rise</li>
+      </ul>
+      <p style="margin-top: 20px;"><em>This data is collected through coordinated global observation programs and helps scientists track Earth's energy imbalance.</em></p>
+    </div>
+
+    <div class="consequences">
+      <div class="consequence-card">
+        <h3>🌊 Sea Level Rise</h3>
+        <p>Thermal expansion from heated oceans is the primary driver of sea level rise, threatening coastal cities worldwide and displacing millions.</p>
+      </div>
+      
+      <div class="consequence-card">
+        <h3>🌀 Extreme Weather</h3>
+        <p>Warmer oceans fuel more powerful hurricanes, typhoons, and cyclones. Each storm draws energy from this vast heat reservoir.</p>
+      </div>
+      
+      <div class="consequence-card">
+        <h3>🐟 Marine Collapse</h3>
+        <p>Ocean ecosystems are collapsing as temperatures rise beyond what marine life can survive. Coral reefs are dying en masse.</p>
+      </div>
+      
+      <div class="consequence-card">
+        <h3>🧊 Ice Sheet Melting</h3>
+        <p>Warm ocean water is melting ice sheets from below, accelerating the loss of Greenland and Antarctic ice at unprecedented rates.</p>
+      </div>
+      
+      <div class="consequence-card">
+        <h3>🌡️ Climate Feedback</h3>
+        <p>As oceans warm, they absorb less CO₂ and release more heat back to the atmosphere, accelerating global warming.</p>
+      </div>
+      
+      <div class="consequence-card">
+        <h3>⚡ Ocean Currents</h3>
+        <p>Critical ocean currents that regulate global climate are weakening and shifting, threatening to disrupt weather patterns worldwide.</p>
+      </div>
     </div>
 
     <footer>
-      <div>Data file: <code>data/ohc_tidy.csv</code> (format: <code>year,ohc_zj</code>). Generate it with <code>data/fetch_data.sh</code>.</div>
-      <div>Sources: NOAA NCEI (World Ocean 0–2000 m), Our World in Data (monthly series based on NOAA).</div>
+      <div>Data sources:
+        <a href="https://www.ncei.noaa.gov/products/world-ocean-database" target="_blank" style="color: #0ea5e9; text-decoration: underline;">NOAA NCEI World Ocean Database</a>,
+        <a href="https://ourworldindata.org/ocean-heat-content" target="_blank" style="color: #0ea5e9; text-decoration: underline;">Our World in Data</a>
+      </div>
+      <div style="margin-top: 10px;">
+        <a href="https://www.climate.gov/news-features/understanding-climate/climate-change-ocean-heat-content" target="_blank" style="color: #0ea5e9; text-decoration: underline;">
+          Climate Change: Ocean Heat Content — Climate.gov
+        </a>
+      </div>
+      <div style="margin-top: 10px; opacity: 0.8;">
+        Every data point represents irreversible change to our planet's life support system.
+      </div>
     </footer>
   </div>
 
   <script src="main.js"></script>
+</body>
+</html>
