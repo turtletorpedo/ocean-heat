@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ocean Heat Content — My Climate Site</title>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root { --ink:#0b1220; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 20px; color: var(--ink); }
+    .wrap { max-width: 920px; margin: 0 auto; }
+    #chartWrap { position: relative; height: 420px; }
+    .big { font-size: 1.25rem; margin: 8px 0 12px; }
+    footer { margin-top: 18px; font-size: 0.9rem; color: #475569; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    input[type="number"] { padding: 6px 8px; width: 110px; }
+    .ok { background:#0ea5e9; color:white; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; }
+    .ok:hover { filter: brightness(1.05); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Ocean Heat Content (0–2000 m)</h1>
+    <p>This chart shows how much heat the global ocean has gained over time. Most of the extra heat from climate change is stored in the oceans.</p>
+
+    <div class="row">
+      <label>My birth year:
+        <input id="birthYear" type="number" value="2015" min="1900" max="2100" />
+      </label>
+      <button class="ok" id="reloadBtn" title="Reload data file">Reload data</button>
+    </div>
+    <div id="sinceBirth" class="big"></div>
+
+    <div id="chartWrap">
+      <canvas id="chart"></canvas>
+    </div>
+
+    <footer>
+      <div>Data file: <code>data/ohc_tidy.csv</code> (format: <code>year,ohc_zj</code>). Generate it with <code>data/fetch_data.sh</code>.</div>
+      <div>Sources: NOAA NCEI (World Ocean 0–2000 m), Our World in Data (monthly series based on NOAA).</div>
+    </footer>
+  </div>
+
+  <script src="main.js"></script>
